@@ -1,0 +1,94 @@
+# ════════════════════════════════════════════════════════════════════
+# render.yaml — Adimma Kann Telegram Bot Deployment Config
+# Deploy on Render.com (Free tier compatible)
+# ════════════════════════════════════════════════════════════════════
+
+services:
+  - type: web
+    name: adimma-kann-bot
+    runtime: python
+    plan: free                          # Free tier on Render
+
+    # ── Build Configuration ──────────────────────────────────────────
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+
+    # ── Start Command ────────────────────────────────────────────────
+    # Gunicorn: 2 workers, 120s timeout (for long TTS/STT operations)
+    startCommand: >
+      gunicorn bot:app
+      --bind 0.0.0.0:$PORT
+      --workers 2
+      --timeout 120
+      --log-level info
+      --access-logfile -
+      --error-logfile -
+
+    # ── Health Check ─────────────────────────────────────────────────
+    healthCheckPath: /health
+
+    # ── Environment Variables ────────────────────────────────────────
+    # Set these in Render Dashboard → Environment tab
+    # DO NOT hardcode secrets here
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false                     # Set manually in Render dashboard
+
+      - key: GROQ_API_KEY
+        sync: false
+
+      - key: GROQ_API_KEY1
+        sync: false
+
+      - key: GROQ_API_KEY2
+        sync: false
+
+      - key: GROQ_API_KEY3
+        sync: false
+
+      - key: OPENWEATHER_API_KEY
+        sync: false
+
+      - key: OWNER_ID
+        value: "733340342"
+
+      - key: TELEGRAM_ALLOWED_USERS
+        sync: false                     # Comma-separated user IDs, optional
+
+      - key: TELEGRAM_ALLOWED_GROUPS
+        sync: false                     # Comma-separated group IDs, optional
+
+      - key: RENDER_EXTERNAL_URL
+        fromService:
+          type: web
+          name: adimma-kann-bot
+          property: host               # Auto-filled by Render
+
+      - key: PORT
+        value: "10000"
+
+    # ── Persistent Disk for TTS cache ────────────────────────────────
+    # Note: Free tier doesn't support persistent disks.
+    # TTS cache is ephemeral (regenerated on restart). That's fine.
+    # Uncomment below if you upgrade to a paid plan:
+    # disk:
+    #   name: tts-cache
+    #   mountPath: /app/tts_cache
+    #   sizeGB: 1
+
+    # ── Auto Deploy on Git Push ──────────────────────────────────────
+    autoDeploy: true
+
+# ════════════════════════════════════════════════════════════════════
+# SETUP CHECKLIST:
+# 1. Push this repo to GitHub
+# 2. Connect repo to Render.com → New Web Service
+# 3. Set all `sync: false` env vars in Render Dashboard
+# 4. Deploy → Render will auto-set RENDER_EXTERNAL_URL
+# 5. After first deploy, the bot auto-registers its webhook
+# 6. Test by sending /start to your bot on Telegram
+# ════════════════════════════════════════════════════════════════════

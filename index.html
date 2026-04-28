@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adimma Kann — Telegram Bot Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --kerala-green: #1a4a2e;
+      --kerala-gold: #d4a017;
+      --deep-teal: #0f2b3d;
+      --neon-green: #00ff88;
+      --card-bg: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0f1e 0%, #0d1f2d 30%, #0a1a0e 70%, #0d0a1a 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(0,255,136,0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,255,136,0.08);
+    }
+
+    .neon-text {
+      color: #00ff88;
+      text-shadow: 0 0 20px rgba(0,255,136,0.5);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #00ff88, #00d4ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .kerala-gradient {
+      background: linear-gradient(135deg, #d4a017, #ff6b35, #c0392b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff88, #00c96d);
+      color: #0a0f1e;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,255,136,0.4);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #00ff88;
+      font-weight: 600;
+      padding: 11px 28px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,255,136,0.4);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,255,136,0.1);
+      border-color: #00ff88;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 13px;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+    }
+    .tab-btn.active {
+      background: rgba(0,255,136,0.15);
+      color: #00ff88;
+    }
+    .tab-btn:hover:not(.active) {
+      color: #e2e8f0;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #00ff88, #00c96d);
+      color: #0a0f1e;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    .hero-bot {
+      font-size: 80px;
+      animation: float 4s ease-in-out infinite;
+      display: block;
+      text-align: center;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .accent-line {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #00ff88, #00d4ff);
+      border-radius: 2px;
+    }
+
+    .file-tree-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .file-tree-item:hover { background: rgba(255,255,255,0.05); }
+    .file-tree-item.active { background: rgba(0,255,136,0.1); color: #00ff88; }
+
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+
+    /* Tooltip */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .lang-badge {
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 3px; }
+
+    .copy-btn {
+      opacity: 0;
+      transition: opacity 0.2s;
+      background: rgba(0,255,136,0.15);
+      border: 1px solid rgba(0,255,136,0.3);
+      color: #00ff88;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .code-block:hover .copy-btn,
+    .code-wrapper:hover .copy-btn { opacity: 1; }
+
+    .highlight-green { color: #00ff88; }
+    .highlight-blue  { color: #60a5fa; }
+    .highlight-yellow{ color: #fbbf24; }
+    .highlight-purple{ color: #a78bfa; }
+    .highlight-gray  { color: #6b7280; }
+
+    /* Mobile nav */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+
+    @media (max-width: 768px) {
+      .desktop-nav { display: none; }
+      .hero-bot { font-size: 56px; }
+    }
+  </style>
+</head>
+<body class="relative z-10">
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 border-b border-white/5 backdrop-blur-xl" style="background:rgba(10,15,30,0.85)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <div class="pulse-dot"></div>
+        <span class="font-bold text-lg" style="color:#00ff88">Adimma Kann</span>
+        <span class="tag" style="background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.2)">v1.0</span>
+      </div>
+      <div class="desktop-nav flex items-center gap-1">
+        <a href="#overview"  class="tab-btn">Overview</a>
+        <a href="#features"  class="tab-btn">Features</a>
+        <a href="#setup"     class="tab-btn">Setup</a>
+        <a href="#files"     class="tab-btn">Files</a>
+        <a href="#tips"      class="tab-btn">Tips</a>
+      </div>
+      <button onclick="toggleMobile()" class="md:hidden p-2 rounded-lg" style="color:#94a3b8">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="flex-col px-4 pb-4 gap-1 border-t border-white/5">
+      <a href="#overview" class="tab-btn block" onclick="toggleMobile()">Overview</a>
+      <a href="#features" class="tab-btn block" onclick="toggleMobile()">Features</a>
+      <a href="#setup"    class="tab-btn block" onclick="toggleMobile()">Setup</a>
+      <a href="#files"    class="tab-btn block" onclick="toggleMobile()">Files</a>
+      <a href="#tips"     class="tab-btn block" onclick="toggleMobile()">Tips</a>
+    </div>
+  </nav>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-20">
+
+    <!-- ═══ HERO ═══ -->
+    <section id="overview" class="text-center mb-20">
+      <span class="hero-bot">🤖</span>
+      <div class="mb-6 mt-4">
+        <h1 class="text-5xl md:text-7xl font-black mb-3 tracking-tight">
+          <span class="gradient-text">Adimma Kann</span>
+        </h1>
+        <p class="text-xl md:text-2xl font-light text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          The sharpest, sassiest, most Kerala-flavoured<br/>
+          <span style="color:#d4a017">voice-first</span> Telegram AI assistant you'll ever meet 😏
+        </p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3 mb-8">
+        <span class="tag" style="background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.2)">🇮🇳 Malayalam</span>
+        <span class="tag" style="background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2)">🎤 Voice-First</span>
+        <span class="tag" style="background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)">⚡ Groq Powered</span>
+        <span class="tag" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2)">🧠 Vision AI</span>
+        <span class="tag" style="background:rgba(251,113,133,0.1);color:#fb7185;border:1px solid rgba(251,113,133,0.2)">😄 Sarcastic</span>
+      </div>
+      <div class="flex justify-center gap-4 flex-wrap">
+        <a href="#setup" class="btn-primary">🚀 Deploy Now</a>
+        <a href="#files" class="btn-secondary">📁 View Files</a>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto">
+        <div class="glass-card p-5">
+          <div class="text-3xl font-black neon-text">4</div>
+          <div class="text-sm text-slate-400 mt-1">Groq API Keys<br/>Round-Robin</div>
+        </div>
+        <div class="glass-card p-5">
+          <div class="text-3xl font-black" style="color:#60a5fa">3</div>
+          <div class="text-sm text-slate-400 mt-1">Languages<br/>EN · ML · Manglish</div>
+        </div>
+        <div class="glass-card p-5">
+          <div class="text-3xl font-black" style="color:#fbbf24">20</div>
+          <div class="text-sm text-slate-400 mt-1">Conversation<br/>History Turns</div>
+        </div>
+        <div class="glass-card p-5">
+          <div class="text-3xl font-black" style="color:#a78bfa">∞</div>
+          <div class="text-sm text-slate-400 mt-1">TTS Cache<br/>MD5 Hashed</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ARCHITECTURE ═══ -->
+    <section class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">System Architecture</h2>
+        <p class="text-slate-400 mt-2">How everything connects together</p>
+      </div>
+
+      <div class="glass-card p-6 md:p-8">
+        <!-- Flow diagram -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-3 text-sm flex-wrap">
+
+          <div class="glass-card p-4 text-center min-w-28">
+            <div class="text-2xl mb-1">📱</div>
+            <div class="font-semibold text-slate-200">Telegram</div>
+            <div class="text-xs text-slate-500">User Input</div>
+          </div>
+
+          <div class="text-slate-500 font-mono text-xs flex items-center gap-1">
+            <div class="hidden md:block">── webhook ──▶</div>
+            <div class="md:hidden">▼</div>
+          </div>
+
+          <div class="glass-card p-4 text-center min-w-28" style="border-color:rgba(0,255,136,0.3)">
+            <div class="text-2xl mb-1">🌶</div>
+            <div class="font-semibold" style="color:#00ff88">Flask</div>
+            <div class="text-xs text-slate-500">Webhook Handler</div>
+          </div>
+
+          <div class="text-slate-500 font-mono text-xs flex items-center gap-1">
+            <div class="hidden md:block">── route ──▶</div>
+            <div class="md:hidden">▼</div>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <div class="glass-card p-3 text-center text-xs" style="border-color:rgba(251,191,36,0.3)">
+              <span style="color:#fbbf24">🎤 STT</span> — Groq Whisper
+            </div>
+            <div class="glass-card p-3 text-center text-xs" style="border-color:rgba(96,165,250,0.3)">
+              <span style="color:#60a5fa">🧠 LLM</span> — Llama 3.3 70B
+            </div>
+            <div class="glass-card p-3 text-center text-xs" style="border-color:rgba(167,139,250,0.3)">
+              <span style="color:#a78bfa">👁 Vision</span> — Llama 4 Scout
+            </div>
+          </div>
+
+          <div class="text-slate-500 font-mono text-xs flex items-center gap-1">
+            <div class="hidden md:block">── reply ──▶</div>
+            <div class="md:hidden">▼</div>
+          </div>
+
+          <div class="glass-card p-4 text-center min-w-28" style="border-color:rgba(251,113,133,0.3)">
+            <div class="text-2xl mb-1">🗣</div>
+            <div class="font-semibold" style="color:#fb7185">edge-tts</div>
+            <div class="text-xs text-slate-500">TTS + Cache</div>
+          </div>
+
+          <div class="text-slate-500 font-mono text-xs flex items-center gap-1">
+            <div class="hidden md:block">── voice+text ──▶</div>
+            <div class="md:hidden">▼</div>
+          </div>
+
+          <div class="glass-card p-4 text-center min-w-28">
+            <div class="text-2xl mb-1">📱</div>
+            <div class="font-semibold text-slate-200">Telegram</div>
+            <div class="text-xs text-slate-500">Text + Voice Reply</div>
+          </div>
+        </div>
+
+        <!-- Tech stack pills -->
+        <div class="mt-8 flex flex-wrap justify-center gap-2">
+          <div class="model-badge" style="background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)">
+            ⚡ llama-3.3-70b-versatile
+          </div>
+          <div class="model-badge" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2)">
+            👁 llama-4-scout-17b (Vision)
+          </div>
+          <div class="model-badge" style="background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2)">
+            🎤 whisper-large-v3 (STT)
+          </div>
+          <div class="model-badge" style="background:rgba(0,255,136,0.1);color:#00ff88;border:1px solid rgba(0,255,136,0.2)">
+            🗣 ml-IN-SobhanaNeural (TTS)
+          </div>
+          <div class="model-badge" style="background:rgba(251,113,133,0.1);color:#fb7185;border:1px solid rgba(251,113,133,0.2)">
+            🌤 OpenWeatherMap
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FEATURES ═══ -->
+    <section id="features" class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Features</h2>
+        <p class="text-slate-400 mt-2">Everything packed into one production-ready bot</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <!-- Feature cards -->
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(0,255,136,0.1)">🎤</div>
+          <h3 class="font-bold text-lg mb-2">Voice-First Design</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Send voice messages → auto-transcribed via Groq Whisper → LLM reply → voice response via edge-tts. Full audio pipeline.</p>
+          <div class="mt-3 flex gap-2 flex-wrap">
+            <span class="lang-badge" style="background:rgba(0,255,136,0.1);color:#00ff88">Whisper STT</span>
+            <span class="lang-badge" style="background:rgba(0,255,136,0.1);color:#00ff88">edge-tts</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(212,160,23,0.1)">🌐</div>
+          <h3 class="font-bold text-lg mb-2">Trilingual Support</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Auto-detects English, Malayalam (Unicode), and Manglish (Romanised Malayalam). Replies in the same language. Malayalam TTS uses <code class="text-yellow-400">ml-IN-SobhanaNeural</code>.</p>
+          <div class="mt-3 flex gap-2 flex-wrap">
+            <span class="lang-badge" style="background:rgba(212,160,23,0.1);color:#fbbf24">🇬🇧 English</span>
+            <span class="lang-badge" style="background:rgba(212,160,23,0.1);color:#fbbf24">🇮🇳 Malayalam</span>
+            <span class="lang-badge" style="background:rgba(212,160,23,0.1);color:#fbbf24">😄 Manglish</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(167,139,250,0.1)">👁</div>
+          <h3 class="font-bold text-lg mb-2">Vision / Image Analysis</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Send photos → described by Llama 4 Scout Vision → contextual reply. Supports captions + questions about images.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="lang-badge" style="background:rgba(167,139,250,0.1);color:#a78bfa">Llama 4 Scout</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(96,165,250,0.1)">📄</div>
+          <h3 class="font-bold text-lg mb-2">PDF / Document Reading</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Send PDFs and text files. Extracts content with PyPDF2, summarises, and answers questions about the content.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="lang-badge" style="background:rgba(96,165,250,0.1);color:#60a5fa">PyPDF2</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(251,113,133,0.1)">😴</div>
+          <h3 class="font-bold text-lg mb-2">Sleep / Wake System</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Say <em>bye / sleep / standby / good night</em> → bot goes silent. Say <em>hi / hello / wake up / adimma</em> → it comes back. Per-chat state.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(251,191,36,0.1)">🌤</div>
+          <h3 class="font-bold text-lg mb-2">Live Weather</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Integrates OpenWeatherMap. Ask "weather in Kochi" naturally — fetches real-time temp, humidity, conditions. Free API tier.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="lang-badge" style="background:rgba(251,191,36,0.1);color:#fbbf24">OpenWeatherMap</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(0,255,136,0.1)">🔄</div>
+          <h3 class="font-bold text-lg mb-2">API Key Rotation</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Up to 4 Groq API keys (GROQ_API_KEY → KEY3) rotated round-robin. Auto-retry on failure. Never hits rate limits.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(167,139,250,0.1)">💾</div>
+          <h3 class="font-bold text-lg mb-2">TTS Caching</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">All TTS audio cached using MD5(voice + text) as filename. Repeated phrases served instantly. Auto-creates <code class="text-purple-400">tts_cache/</code>.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(96,165,250,0.1)">📖</div>
+          <h3 class="font-bold text-lg mb-2">Conversation Memory</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Remembers last 20 messages per chat. Context-aware replies. Use /clear to wipe history. Each chat has isolated state.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(251,113,133,0.1)">🔔</div>
+          <h3 class="font-bold text-lg mb-2">Owner Notifications</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">When a new private user starts the bot, the owner (ID: 733340342) gets notified with name, username, and user ID.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(0,255,136,0.1)">🛡</div>
+          <h3 class="font-bold text-lg mb-2">Access Control</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Whitelist users via <code class="text-green-400">TELEGRAM_ALLOWED_USERS</code> and groups via <code class="text-green-400">TELEGRAM_ALLOWED_GROUPS</code> env vars.</p>
+        </div>
+
+        <div class="glass-card p-6">
+          <div class="feature-icon mb-4" style="background:rgba(251,191,36,0.1)">📝</div>
+          <h3 class="font-bold text-lg mb-2">Editable Personality</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Full character prompt lives in <code class="text-yellow-400">character.txt</code> — edit without touching code. Supports any persona you dream up.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ COMMANDS ═══ -->
+    <section class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Bot Commands</h2>
+      </div>
+
+      <div class="glass-card p-6 md:p-8">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.1)">
+            <div class="font-mono font-bold" style="color:#00ff88">/start</div>
+            <div class="text-slate-400 text-sm">Welcome message + owner notification for new users</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(96,165,250,0.05);border:1px solid rgba(96,165,250,0.1)">
+            <div class="font-mono font-bold" style="color:#60a5fa">/help</div>
+            <div class="text-slate-400 text-sm">Show full usage guide with all features explained</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.1)">
+            <div class="font-mono font-bold" style="color:#fbbf24">/instruction</div>
+            <div class="text-slate-400 text-sm">Alias for /help — same usage guide</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(251,113,133,0.05);border:1px solid rgba(251,113,133,0.1)">
+            <div class="font-mono font-bold" style="color:#fb7185">/clear</div>
+            <div class="text-slate-400 text-sm">Wipe conversation history for current chat</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.1)">
+            <div class="font-mono font-bold" style="color:#a78bfa">/status</div>
+            <div class="text-slate-400 text-sm">Show bot health, keys loaded, cache size, sleep state</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+            <div class="font-mono font-bold" style="color:#94a3b8">bye / sleep / standby</div>
+            <div class="text-slate-400 text-sm">Enter sleep mode — bot stops responding silently</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+            <div class="font-mono font-bold" style="color:#94a3b8">hi / hello / adimma</div>
+            <div class="text-slate-400 text-sm">Wake up from sleep mode and resume normal responses</div>
+          </div>
+          <div class="flex gap-4 items-start p-4 rounded-xl" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+            <div class="font-mono font-bold" style="color:#94a3b8">weather in [city]</div>
+            <div class="text-slate-400 text-sm">Natural language weather query — fetched live via OpenWeatherMap</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PROJECT FILES ═══ -->
+    <section id="files" class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Project Files</h2>
+        <p class="text-slate-400 mt-2">Complete file structure with descriptions</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+
+        <!-- File tree -->
+        <div class="glass-card p-5 col-span-1">
+          <h3 class="font-semibold text-sm text-slate-400 mb-4 uppercase tracking-wider">📁 Structure</h3>
+          <div class="space-y-1">
+            <div class="file-tree-item active" onclick="showFile('bot')">
+              <span style="color:#fbbf24">🐍</span> bot.py <span class="ml-auto text-xs text-slate-500">main</span>
+            </div>
+            <div class="file-tree-item" onclick="showFile('char')">
+              <span style="color:#a78bfa">✏️</span> character.txt
+            </div>
+            <div class="file-tree-item" onclick="showFile('req')">
+              <span style="color:#60a5fa">📦</span> requirements.txt
+            </div>
+            <div class="file-tree-item" onclick="showFile('render')">
+              <span style="color:#00ff88">☁️</span> render.yaml
+            </div>
+            <div class="file-tree-item" onclick="showFile('git')">
+              <span style="color:#94a3b8">🙈</span> .gitignore
+            </div>
+            <div class="file-tree-item" onclick="showFile('cache')">
+              <span style="color:#fb7185">🗄️</span> tts_cache/ <span class="ml-auto text-xs text-slate-500">auto</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- File details -->
+        <div class="glass-card p-5 col-span-2" id="file-detail">
+          <div id="file-bot">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">🐍 bot.py</h3>
+              <span class="tag" style="background:rgba(251,191,36,0.1);color:#fbbf24">Main Application</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">The heart of the bot. All logic lives here — webhook handler, message routing, LLM calls, STT, TTS, image analysis, PDF reading, and more.</p>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-slate-500 text-xs mb-1">Functions</div>
+                <div class="font-mono">30+ modular functions</div>
+              </div>
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-slate-500 text-xs mb-1">Lines of code</div>
+                <div class="font-mono">~700 lines</div>
+              </div>
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-slate-500 text-xs mb-1">Flask routes</div>
+                <div class="font-mono">/, /health, /webhook/</div>
+              </div>
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-slate-500 text-xs mb-1">Key feature</div>
+                <div class="font-mono">Auto webhook setup</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="file-char" style="display:none">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">✏️ character.txt</h3>
+              <span class="tag" style="background:rgba(167,139,250,0.1);color:#a78bfa">Editable Prompt</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">The system prompt that defines Adimma Kann's personality. Edit this file anytime to change the bot's character — no code changes needed.</p>
+            <div class="code-block text-xs">
+              <span class="highlight-green">You are Adimma Kann</span> — witty, sarcastic,<br/>
+              <span class="highlight-yellow">Kerala-flavoured</span> AI assistant...<br/><br/>
+              <span class="highlight-gray"># Sections:</span><br/>
+              <span class="highlight-blue">PERSONALITY CORE</span> → Core traits<br/>
+              <span class="highlight-blue">HOW YOU SPEAK</span> → English/ML/Manglish styles<br/>
+              <span class="highlight-blue">RESPONSE STYLE</span> → Format & tone guidelines<br/>
+              <span class="highlight-blue">BOUNDARIES</span> → What to avoid<br/>
+              <span class="highlight-blue">SPECIAL SITUATIONS</span> → Media handling notes
+            </div>
+          </div>
+
+          <div id="file-req" style="display:none">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">📦 requirements.txt</h3>
+              <span class="tag" style="background:rgba(96,165,250,0.1);color:#60a5fa">Dependencies</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">All Python package dependencies pinned to stable versions.</p>
+            <div class="code-block text-xs space-y-1">
+              <div><span class="highlight-green">flask==3.0.3</span>            <span class="highlight-gray"># Web framework</span></div>
+              <div><span class="highlight-green">gunicorn==22.0.0</span>         <span class="highlight-gray"># Production WSGI server</span></div>
+              <div><span class="highlight-yellow">groq==0.11.0</span>             <span class="highlight-gray"># LLM + Whisper STT</span></div>
+              <div><span class="highlight-blue">edge-tts==6.1.12</span>         <span class="highlight-gray"># Free TTS (no API key!)</span></div>
+              <div><span class="highlight-purple">Pillow==10.4.0</span>           <span class="highlight-gray"># Image processing</span></div>
+              <div><span class="highlight-purple">PyPDF2==3.0.1</span>            <span class="highlight-gray"># PDF extraction</span></div>
+              <div><span class="highlight-blue">langdetect==1.0.9</span>        <span class="highlight-gray"># Language detection</span></div>
+              <div><span class="highlight-green">requests==2.32.3</span>         <span class="highlight-gray"># HTTP (Telegram + weather)</span></div>
+              <div><span class="highlight-gray">aiohttp + aiofiles</span>       <span class="highlight-gray"># Async support for TTS</span></div>
+              <div><span class="highlight-gray">python-dotenv==1.0.1</span>     <span class="highlight-gray"># Local .env loading</span></div>
+            </div>
+          </div>
+
+          <div id="file-render" style="display:none">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">☁️ render.yaml</h3>
+              <span class="tag" style="background:rgba(0,255,136,0.1);color:#00ff88">Deployment Config</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">One-click deployment config for Render.com. Defines service type, build/start commands, env vars, and health checks.</p>
+            <div class="code-block text-xs">
+              <div><span class="highlight-green">type: web</span></div>
+              <div><span class="highlight-blue">plan: free</span>           <span class="highlight-gray"># Render free tier</span></div>
+              <div><span class="highlight-yellow">buildCommand</span>: pip install -r requirements.txt</div>
+              <div><span class="highlight-yellow">startCommand</span>: gunicorn bot:app --workers 2 --timeout 120</div>
+              <div><span class="highlight-purple">healthCheckPath</span>: /health</div>
+              <div><span class="highlight-gray">envVars</span>: All API keys (sync: false = manual set)</div>
+              <div><span class="highlight-green">autoDeploy: true</span>      <span class="highlight-gray"># Push = auto-deploy</span></div>
+            </div>
+          </div>
+
+          <div id="file-git" style="display:none">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">🙈 .gitignore</h3>
+              <span class="tag" style="background:rgba(255,255,255,0.05);color:#94a3b8">Git Config</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">Excludes secrets, caches, virtual environments, and generated files from version control.</p>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-red-400 text-xs mb-2">🚫 Excluded</div>
+                <div class="text-xs text-slate-400 space-y-1">
+                  <div>.env (secrets!)</div>
+                  <div>tts_cache/*.mp3</div>
+                  <div>__pycache__/</div>
+                  <div>venv/ / .venv/</div>
+                  <div>*.log files</div>
+                </div>
+              </div>
+              <div class="p-3 rounded-lg" style="background:rgba(0,0,0,0.3)">
+                <div class="text-green-400 text-xs mb-2">✅ Committed</div>
+                <div class="text-xs text-slate-400 space-y-1">
+                  <div>bot.py</div>
+                  <div>character.txt</div>
+                  <div>requirements.txt</div>
+                  <div>render.yaml</div>
+                  <div>.gitignore</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="file-cache" style="display:none">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-lg">🗄️ tts_cache/</h3>
+              <span class="tag" style="background:rgba(251,113,133,0.1);color:#fb7185">Auto-Generated</span>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">Auto-created on first run. Stores TTS audio files named by MD5 hash of (voice + text). Eliminates duplicate TTS synthesis.</p>
+            <div class="code-block text-xs">
+              <span class="highlight-gray"># Example cache files:</span><br/>
+              <span class="highlight-green">a3f8d2c1...</span>.mp3  <span class="highlight-gray">← en-GB-RyanNeural + "Hello sir"</span><br/>
+              <span class="highlight-green">7b2e9a4f...</span>.mp3  <span class="highlight-gray">← ml-IN-SobhanaNeural + "ശരി സർ"</span><br/><br/>
+              <span class="highlight-gray"># Naming: MD5(f"{voice}::{text}")</span><br/>
+              <span class="highlight-gray"># Note: excluded from git via .gitignore</span><br/>
+              <span class="highlight-gray"># Note: ephemeral on Render free tier (resets on deploy)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SETUP GUIDE ═══ -->
+    <section id="setup" class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Deployment Guide</h2>
+        <p class="text-slate-400 mt-2">From zero to running bot in under 10 minutes</p>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="flex gap-2 mb-6 p-1 rounded-xl w-fit" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)">
+        <button class="tab-btn active" onclick="switchTab('render', this)">☁️ Render.com</button>
+        <button class="tab-btn" onclick="switchTab('local', this)">💻 Local Dev</button>
+        <button class="tab-btn" onclick="switchTab('botfather', this)">🤖 BotFather</button>
+      </div>
+
+      <!-- Render tab -->
+      <div id="tab-render" class="tab-content active">
+        <div class="space-y-4">
+          <div class="glass-card p-6 flex gap-4">
+            <div class="step-number">1</div>
+            <div>
+              <h4 class="font-semibold mb-1">Push to GitHub</h4>
+              <p class="text-slate-400 text-sm mb-3">Create a new GitHub repository and push all 5 files.</p>
+              <div class="code-block text-xs">
+                <span class="highlight-gray"># In your project folder:</span><br/>
+                <span class="highlight-green">git</span> init<br/>
+                <span class="highlight-green">git</span> add bot.py character.txt requirements.txt render.yaml .gitignore<br/>
+                <span class="highlight-green">git</span> commit -m <span class="highlight-yellow">"Initial commit: Adimma Kann bot"</span><br/>
+                <span class="highlight-green">git</span> remote add origin https://github.com/YOUR_USERNAME/adimma-kann.git<br/>
+                <span class="highlight-green">git</span> push -u origin main
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 flex gap-4">
+            <div class="step-number">2</div>
+            <div>
+              <h4 class="font-semibold mb-1">Connect to Render.com</h4>
+              <p class="text-slate-400 text-sm">Go to <span style="color:#00ff88">render.com</span> → New → Web Service → Connect GitHub repo → Render auto-detects render.yaml.</p>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 flex gap-4">
+            <div class="step-number">3</div>
+            <div>
+              <h4 class="font-semibold mb-1">Set Environment Variables</h4>
+              <p class="text-slate-400 text-sm mb-3">In Render Dashboard → Environment tab, add these secrets:</p>
+              <div class="grid md:grid-cols-2 gap-2 text-xs">
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#fb7185">TELEGRAM_BOT_TOKEN</span>=your_token
+                </div>
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#fbbf24">GROQ_API_KEY</span>=gsk_xxx
+                </div>
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#fbbf24">GROQ_API_KEY1</span>=gsk_yyy (optional)
+                </div>
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#fbbf24">GROQ_API_KEY2</span>=gsk_zzz (optional)
+                </div>
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#60a5fa">OPENWEATHER_API_KEY</span>=owm_xxx
+                </div>
+                <div class="p-2 rounded-lg font-mono" style="background:rgba(0,0,0,0.4)">
+                  <span style="color:#a78bfa">OWNER_ID</span>=733340342
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 flex gap-4">
+            <div class="step-number">4</div>
+            <div>
+              <h4 class="font-semibold mb-1">Deploy & Verify</h4>
+              <p class="text-slate-400 text-sm mb-3">Click Deploy. Render builds & starts automatically. The bot registers its webhook on startup.</p>
+              <p class="text-slate-400 text-sm">✅ Visit <code class="text-green-400">https://your-app.onrender.com/health</code> — should return <code class="text-green-400">{"status": "healthy"}</code></p>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 flex gap-4" style="border-color:rgba(0,255,136,0.3)">
+            <div class="step-number">5</div>
+            <div>
+              <h4 class="font-semibold mb-1 neon-text">Test the Bot!</h4>
+              <p class="text-slate-400 text-sm">Open Telegram → find your bot → send <code class="text-green-400">/start</code> → Adimma Kann responds! 🎉</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Local dev tab -->
+      <div id="tab-local" class="tab-content">
+        <div class="glass-card p-6">
+          <div class="code-block text-xs space-y-2">
+            <div><span class="highlight-gray"># 1. Clone / create project folder</span></div>
+            <div><span class="highlight-green">mkdir</span> adimma-kann && <span class="highlight-green">cd</span> adimma-kann</div>
+            <br/>
+            <div><span class="highlight-gray"># 2. Create virtual environment</span></div>
+            <div><span class="highlight-green">python3</span> -m venv venv && <span class="highlight-green">source</span> venv/bin/activate</div>
+            <br/>
+            <div><span class="highlight-gray"># 3. Install dependencies</span></div>
+            <div><span class="highlight-green">pip</span> install -r requirements.txt</div>
+            <br/>
+            <div><span class="highlight-gray"># 4. Install ffmpeg (required for audio processing)</span></div>
+            <div><span class="highlight-gray"># Ubuntu/Debian:</span></div>
+            <div><span class="highlight-green">sudo apt</span> install ffmpeg</div>
+            <div><span class="highlight-gray"># macOS:</span></div>
+            <div><span class="highlight-green">brew</span> install ffmpeg</div>
+            <br/>
+            <div><span class="highlight-gray"># 5. Create .env file</span></div>
+            <div><span class="highlight-green">cat</span> &gt; .env &lt;&lt; EOF</div>
+            <div>TELEGRAM_BOT_TOKEN=your_token_here</div>
+            <div>GROQ_API_KEY=gsk_your_key_here</div>
+            <div>OPENWEATHER_API_KEY=your_owm_key</div>
+            <div>RENDER_EXTERNAL_URL=https://your-ngrok-url.ngrok.io</div>
+            <div>EOF</div>
+            <br/>
+            <div><span class="highlight-gray"># 6. Expose local port (for webhook)</span></div>
+            <div><span class="highlight-green">ngrok</span> http 10000</div>
+            <div><span class="highlight-gray"># Copy the https URL to RENDER_EXTERNAL_URL in .env</span></div>
+            <br/>
+            <div><span class="highlight-gray"># 7. Run the bot</span></div>
+            <div><span class="highlight-green">python3</span> bot.py</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BotFather tab -->
+      <div id="tab-botfather" class="tab-content">
+        <div class="glass-card p-6">
+          <div class="space-y-4">
+            <div class="flex gap-3 items-start">
+              <span class="text-2xl">1️⃣</span>
+              <div>
+                <div class="font-semibold mb-1">Open @BotFather on Telegram</div>
+                <div class="text-slate-400 text-sm">Search for <code class="text-blue-400">@BotFather</code> in Telegram and start a conversation.</div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-2xl">2️⃣</span>
+              <div>
+                <div class="font-semibold mb-1">Create new bot</div>
+                <div class="code-block text-xs mt-2">
+                  Send: /newbot<br/>
+                  Name: Adimma Kann<br/>
+                  Username: adimma_kann_bot (must end with 'bot')
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-2xl">3️⃣</span>
+              <div>
+                <div class="font-semibold mb-1">Copy the token</div>
+                <div class="text-slate-400 text-sm">BotFather gives you a token like <code class="text-yellow-400">1234567890:AAF...</code> — copy it to <code class="text-green-400">TELEGRAM_BOT_TOKEN</code> env var.</div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-2xl">4️⃣</span>
+              <div>
+                <div class="font-semibold mb-1">Set bot commands (optional but nice)</div>
+                <div class="code-block text-xs mt-2">
+                  Send /setcommands to @BotFather, select your bot, then paste:<br/><br/>
+                  start - Start Adimma Kann<br/>
+                  help - Show usage guide<br/>
+                  instruction - Usage guide (alias)<br/>
+                  clear - Clear conversation history<br/>
+                  status - Check bot status
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="text-2xl">5️⃣</span>
+              <div>
+                <div class="font-semibold mb-1">Get your User ID (Owner ID)</div>
+                <div class="text-slate-400 text-sm">Message <code class="text-blue-400">@userinfobot</code> on Telegram — it tells you your user ID. Set it as <code class="text-green-400">OWNER_ID</code> env var.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ LANGUAGE & TTS TIPS ═══ -->
+    <section id="tips" class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Language Detection & TTS Tips</h2>
+        <p class="text-slate-400 mt-2">How to improve Malayalam + Manglish experience</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <div class="glass-card p-6">
+          <h3 class="font-bold text-lg mb-4">🔍 How Language Detection Works</h3>
+          <div class="space-y-4 text-sm">
+            <div class="flex gap-3 items-start">
+              <span class="step-number text-xs" style="width:28px;height:28px;font-size:12px">1</span>
+              <div>
+                <div class="font-semibold text-slate-200">Unicode Script Check</div>
+                <div class="text-slate-400">If any character is in Malayalam Unicode range (U+0D00–U+0D7F) → classified as <span style="color:#fbbf24">Malayalam</span></div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="step-number text-xs" style="width:28px;height:28px;font-size:12px">2</span>
+              <div>
+                <div class="font-semibold text-slate-200">Manglish Keyword Match</div>
+                <div class="text-slate-400">60+ Manglish keywords (njan, enthaaa, alle, pwoli, machaan...). If ≥10% of words match → <span style="color:#00ff88">Manglish</span></div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <span class="step-number text-xs" style="width:28px;height:28px;font-size:12px">3</span>
+              <div>
+                <div class="font-semibold text-slate-200">langdetect Fallback</div>
+                <div class="text-slate-400">If 'ml' detected → Malayalam. Indian languages (ta, te, kn, hi) + Manglish hints → Manglish. Default → English.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="font-bold text-lg mb-4">🎙 TTS Voice Selection</h3>
+          <div class="space-y-3 text-sm">
+            <div class="p-3 rounded-lg flex justify-between items-center" style="background:rgba(0,0,0,0.3)">
+              <div>
+                <div class="font-semibold" style="color:#fbbf24">🇮🇳 Malayalam</div>
+                <div class="text-slate-400 text-xs">Unicode script detected</div>
+              </div>
+              <div class="font-mono text-xs" style="color:#00ff88">ml-IN-SobhanaNeural</div>
+            </div>
+            <div class="p-3 rounded-lg flex justify-between items-center" style="background:rgba(0,0,0,0.3)">
+              <div>
+                <div class="font-semibold" style="color:#60a5fa">😄 Manglish</div>
+                <div class="text-slate-400 text-xs">Romanised Malayalam keywords</div>
+              </div>
+              <div class="font-mono text-xs" style="color:#00ff88">en-IN-PrabhatNeural</div>
+            </div>
+            <div class="p-3 rounded-lg flex justify-between items-center" style="background:rgba(0,0,0,0.3)">
+              <div>
+                <div class="font-semibold" style="color:#a78bfa">🇬🇧 English</div>
+                <div class="text-slate-400 text-xs">Default detection</div>
+              </div>
+              <div class="font-mono text-xs" style="color:#00ff88">en-GB-RyanNeural</div>
+            </div>
+            <div class="p-3 rounded-lg flex justify-between items-center" style="background:rgba(0,0,0,0.3)">
+              <div>
+                <div class="font-semibold" style="color:#fb7185">🆘 Fallback</div>
+                <div class="text-slate-400 text-xs">On voice synthesis error</div>
+              </div>
+              <div class="font-mono text-xs" style="color:#00ff88">en-US-GuyNeural</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="font-bold text-lg mb-4">💡 Pro Improvement Tips</h3>
+          <div class="space-y-3 text-sm text-slate-400">
+            <div class="flex gap-2">
+              <span style="color:#00ff88">▸</span>
+              <div><strong class="text-slate-200">Expand Manglish keywords:</strong> Add more regional words from your area to MANGLISH_KEYWORDS set in bot.py for better detection accuracy.</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#00ff88">▸</span>
+              <div><strong class="text-slate-200">Add "ml" STT hint by default:</strong> Change hint_language default to "malayalam" in transcribe_audio() if most voice messages are Malayalam.</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#00ff88">▸</span>
+              <div><strong class="text-slate-200">Try ml-IN-MidhunNeural:</strong> Alternative Malayalam TTS voice (male). Change TTS_VOICE_MALAYALAM constant in bot.py.</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#00ff88">▸</span>
+              <div><strong class="text-slate-200">Whisper prompt:</strong> Add "Malayalam language, Kerala accent" as prompt parameter to transcribe_audio() for better STT accuracy.</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#00ff88">▸</span>
+              <div><strong class="text-slate-200">Use whisper-large-v3 (not turbo):</strong> Already set. It handles Malayalam significantly better than the turbo model.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card p-6">
+          <h3 class="font-bold text-lg mb-4">🚀 Future Enhancement Ideas</h3>
+          <div class="space-y-3 text-sm text-slate-400">
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">News API:</strong> Free newsapi.org — "latest news" queries</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Wikipedia search:</strong> wikipedia Python package for factual Q&A</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Reminder system:</strong> APScheduler for timed reminders</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">YouTube transcribe:</strong> yt-dlp + Whisper for "summarise this video" links</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Image generation:</strong> Groq's image APIs when available</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Persistent storage:</strong> SQLite / Render persistent disk for long-term history</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Inline mode:</strong> @adimma_kann_bot query directly in any chat</div>
+            </div>
+            <div class="flex gap-2">
+              <span style="color:#fbbf24">◆</span>
+              <div><strong class="text-slate-200">Web search:</strong> Tavily/SerpAPI free tier for real-time info</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ ENV REFERENCE ═══ -->
+    <section class="mb-20">
+      <div class="text-center mb-10">
+        <div class="accent-line mx-auto mb-4"></div>
+        <h2 class="text-3xl font-bold gradient-text">Environment Variables Reference</h2>
+      </div>
+
+      <div class="glass-card overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="background:rgba(0,255,136,0.05);border-bottom:1px solid rgba(255,255,255,0.08)">
+                <th class="text-left p-4 font-semibold text-slate-300">Variable</th>
+                <th class="text-left p-4 font-semibold text-slate-300">Required</th>
+                <th class="text-left p-4 font-semibold text-slate-300">Description</th>
+                <th class="text-left p-4 font-semibold text-slate-300">Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#fb7185">TELEGRAM_BOT_TOKEN</td>
+                <td class="p-4"><span class="tag" style="background:rgba(251,113,133,0.1);color:#fb7185">Required</span></td>
+                <td class="p-4 text-slate-400">Bot token from @BotFather</td>
+                <td class="p-4 font-mono text-xs text-slate-500">1234567890:AAF...</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#fbbf24">GROQ_API_KEY</td>
+                <td class="p-4"><span class="tag" style="background:rgba(251,113,133,0.1);color:#fb7185">Required</span></td>
+                <td class="p-4 text-slate-400">Primary Groq API key</td>
+                <td class="p-4 font-mono text-xs text-slate-500">gsk_xxx...</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#fbbf24">GROQ_API_KEY1-3</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Optional</span></td>
+                <td class="p-4 text-slate-400">Extra keys for rotation (reliability)</td>
+                <td class="p-4 font-mono text-xs text-slate-500">gsk_yyy...</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#60a5fa">OPENWEATHER_API_KEY</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Optional</span></td>
+                <td class="p-4 text-slate-400">OpenWeatherMap free tier (weather feature)</td>
+                <td class="p-4 font-mono text-xs text-slate-500">abc123...</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#a78bfa">OWNER_ID</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Optional</span></td>
+                <td class="p-4 text-slate-400">Your Telegram user ID (default: 733340342)</td>
+                <td class="p-4 font-mono text-xs text-slate-500">733340342</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#00ff88">TELEGRAM_ALLOWED_USERS</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Optional</span></td>
+                <td class="p-4 text-slate-400">Comma-separated user IDs allowed to use bot</td>
+                <td class="p-4 font-mono text-xs text-slate-500">123,456,789</td>
+              </tr>
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                <td class="p-4 font-mono" style="color:#00ff88">TELEGRAM_ALLOWED_GROUPS</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Optional</span></td>
+                <td class="p-4 text-slate-400">Comma-separated group chat IDs</td>
+                <td class="p-4 font-mono text-xs text-slate-500">-100123,-100456</td>
+              </tr>
+              <tr>
+                <td class="p-4 font-mono" style="color:#00ff88">RENDER_EXTERNAL_URL</td>
+                <td class="p-4"><span class="tag" style="background:rgba(100,116,139,0.1);color:#94a3b8">Auto-set</span></td>
+                <td class="p-4 text-slate-400">Your Render app URL (auto-registered as webhook)</td>
+                <td class="p-4 font-mono text-xs text-slate-500">https://adimma.onrender.com</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="text-center pt-10 border-t border-white/5">
+      <div class="text-4xl mb-3">😏</div>
+      <p class="text-slate-400 text-sm">
+        Built with maximum personality, minimum filter.<br/>
+        <span class="neon-text font-semibold">Adimma Kann</span> — serving sir, one sarcastic reply at a time.
+      </p>
+      <p class="text-slate-600 text-xs mt-4">Flask · Groq · edge-tts · Render.com · Telegram Bot API</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ── Mobile menu ──────────────────────────────────────────────────────────
+    function toggleMobile() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('open');
+    }
+
+    // ── Tab switcher ─────────────────────────────────────────────────────────
+    function switchTab(tabId, btn) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      // Deactivate all tab buttons in this group
+      btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      // Activate selected
+      document.getElementById('tab-' + tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ── File tree ────────────────────────────────────────────────────────────
+    function showFile(id) {
+      // Hide all file detail sections
+      document.querySelectorAll('[id^="file-"]').forEach(el => el.style.display = 'none');
+      // Show selected
+      const el = document.getElementById('file-' + id);
+      if (el) el.style.display = 'block';
+      // Update active state in tree
+      document.querySelectorAll('.file-tree-item').forEach(item => item.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    // ── Smooth scroll for nav links ──────────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ── Copy to clipboard for code blocks ────────────────────────────────────
+    document.querySelectorAll('.code-block').forEach(block => {
+      block.style.position = 'relative';
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.style.position = 'absolute';
+      btn.style.top = '8px';
+      btn.style.right = '8px';
+      btn.addEventListener('click', () => {
+        const text = block.innerText.replace('Copy', '').trim();
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '✓ Copied!';
+          btn.style.color = '#00ff88';
+          setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+        });
+      });
+      block.appendChild(btn);
+    });
+
+    // ── Intersection observer for scroll animations ───────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+      observer.observe(card);
+    });
+
+    // ── Active nav link on scroll ─────────────────────────────────────────────
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.desktop-nav .tab-btn');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 100;
+        if (window.scrollY >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    console.log('%c😏 Adimma Kann Project Dashboard', 'font-size:18px;color:#00ff88;font-weight:bold');
+    console.log('%cSharp. Sarcastic. Kerala-flavoured.', 'color:#fbbf24;font-size:12px');
+  </script>
+</body>
+</html>
