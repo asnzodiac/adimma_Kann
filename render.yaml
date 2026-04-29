@@ -17,7 +17,7 @@ services:
     # ── Start Command ────────────────────────────────────────────────
     # Gunicorn: 2 workers, 120s timeout (for long TTS/STT operations)
     startCommand: >
-      gunicorn bot:app
+      gunicorn app:app
       --bind 0.0.0.0:$PORT
       --workers 2
       --timeout 120
