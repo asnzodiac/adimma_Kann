@@ -1,0 +1,37 @@
+# ════════════════════════════════════════════════
+# Adimma Kann — requirements.txt
+# ════════════════════════════════════════════════
+
+# Web framework & server
+flask==3.0.3
+gunicorn==22.0.0
+
+# Groq AI client (LLM + STT/Whisper)
+groq==0.11.0
+
+# Text-to-Speech (Microsoft Edge TTS, free, no API key needed)
+edge-tts==6.1.12
+
+# Image processing (for vision/photo analysis)
+Pillow==10.4.0
+
+# PDF text extraction
+PyPDF2==3.0.1
+
+# Language detection
+langdetect==1.0.9
+
+# HTTP requests (Telegram API calls, weather, etc.)
+requests==2.32.3
+
+# Async support (edge-tts runs async)
+aiohttp==3.9.5
+aiofiles==23.2.1
+
+# Environment variable loading (for local dev)
+python-dotenv==1.0.1
+
+# ════════════════════════════════════════════════
+# System dependencies (installed via apt in render.yaml):
+#   ffmpeg — audio format conversion for voice processing
+# ════════════════════════════════════════════════
